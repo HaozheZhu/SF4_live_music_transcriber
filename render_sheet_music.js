@@ -39,6 +39,6 @@ Formatter.FormatAndDraw(context, stave, notes);
 
 const doc = new jsPDF();
 const svgElement = div.childNodes[0];
-doc.svg(svgElement).then(() => doc.save("score.pdf"));
+doc.svg(svgElement).then(() => doc.save("./tmp/score.pdf"));
 
 console.log("Saved score.pdf");
