@@ -3,20 +3,18 @@ By hz403 and rw680
 
 ## Folders and files structure
 ```
-SF4_music_notes_logger
-|   README.md
-|
-└───firmware
-|
-|
-└───software
-|   |   top.py
-|   |   analysis.py
-|   |   gui.py
-|   |   render_sheet_music.js
-|   |
-|   └───node_modules (node.js libraries)
-|   └───tmp 
-|
+📦SF4_music_notes_logger
+ ┣ 📂firmware (to be run on MCU)
+ ┃ ┗ 📜firmware.ino
+ ┣ 📂software (to be run on PC)
+ ┃ ┣ 📂tmp
+ ┃ ┃ ┗ 📜score.pdf
+ ┃ ┣ 📜analsys.py
+ ┃ ┣ 📜gui.py
+ ┃ ┣ 📜render_sheet_music.js
+ ┃ ┣ 📜test.mp3
+ ┃ ┣ 📜test.wav
+ ┃ ┗ 📜top.py
+ ┗ 📜README.md
 
 ```
