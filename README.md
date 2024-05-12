@@ -1,7 +1,7 @@
-### A data logger capabable of recording music and identifying musical notes and draw sheet music
+# A data logger capabable of recording music and identifying musical notes and draw sheet music
 By hz403 and rw680
 
-# Files
+## Folders and files structure
 ```
 SF4_music_notes_logger
 |   README.md
@@ -17,5 +17,6 @@ SF4_music_notes_logger
 |   |
 |   └───node_modules (node.js libraries)
 |   └───tmp 
+|
 
 ```
