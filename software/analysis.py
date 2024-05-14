@@ -3,8 +3,17 @@ import scipy.fft as fft
 import scipy.signal as signal
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # TODO: need to find start of a new note by finding sharp increases in amplitude
+
+def freq_to_note(freq):
+    note_freq_table = pd.read_csv('./software/note_frequency_conversion.csv')
+    note_freq_table = note_freq_table.astype({'Frequency': float, 'Note': str})
+    note_freq_table['offset'] = note_freq_table['Frequency'] - freq
+    note_freq_table['offset'] = abs(note_freq_table['offset'])
+    note_freq_table = note_freq_table.sort_values(by='offset')
+    return note_freq_table.iloc[0]['Note']
 
 if __name__ == '__main__':
     sample_rate, data = wavfile.read('./software/test.wav') # data has two channels, left and right
@@ -39,6 +48,11 @@ if __name__ == '__main__':
     ax[1].set_title('Audio Signal (frequency domain)')
 
     # TODO: Find the fundamental frequency of the note
-    peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.5, distance=50)
+    peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.3, distance=50)
     ax[1].plot(spectrum_freq[peaks], spectrum_mag[peaks], 'x', color='red')
+    print('Peaks:', peaks)
+
+    for peak in peaks:
+        print('Peak frequency:', spectrum_freq[peak])
+        print('Peak note:', freq_to_note(spectrum_freq[peak]))
     plt.show()
