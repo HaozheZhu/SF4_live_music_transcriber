@@ -15,11 +15,19 @@ def freq_to_note(freq):
     note_freq_table = note_freq_table.sort_values(by='offset')
     return note_freq_table.iloc[0]['Note']
 
+def freq_analysis(data, sample_rate): 
+    n = len(data)
+    fourier = fft.fft(data) / n
+    freq = fft.fftfreq(n, 1/sample_rate)
+    spectrum_freq = freq[:n//2]
+    spectrum_mag = np.abs(fourier)[:n//2]
+    return spectrum_freq, spectrum_mag
+
 if __name__ == '__main__':
     sample_rate, data = wavfile.read('./software/test.wav') # data has two channels, left and right
     data = data[:, 0]  # Use only one channel
     start_sec = 0.0
-    end_sec = 1
+    end_sec = 5
     time = np.arange(0, float(data.shape[0]), 1) / sample_rate
     # Use only the first few seconds for testing purposes
     time = time[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
@@ -29,19 +37,23 @@ if __name__ == '__main__':
     print('Total samples:', len(data))
     print('Duration:', len(data) / sample_rate, 'seconds')
 
-    # Plot the audio signal
-    fig, ax = plt.subplots(2, 1)
+    # Plot the time domain
+    fig, ax = plt.subplots(3, 1)
     ax[0].plot(time, data, linewidth=0.6, alpha = 0.9, color='black')
     ax[0].set_xlabel('Time (s)')
     ax[0].set_ylabel('Amplitude')
     ax[0].set_title('Audio Signal (time domain)')
+    envelope = abs(signal.hilbert(data))
+    smoothed_envelope = signal.savgol_filter(envelope, 800, 3)
+    ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='blue')
+    ax[0].plot(time, smoothed_envelope, linewidth=0.6, alpha = 0.9, color='red')
+    gradient = np.gradient(smoothed_envelope)
+    gradient_peak, _ = signal.find_peaks(gradient, height=max(gradient)*0.3, distance=int(sample_rate*0.05))
+    ax[2].plot(time, gradient, linewidth=0.6, alpha = 0.9, color='green')
+    ax[2].plot(time[gradient_peak], gradient[gradient_peak], 'x', color='red')
+    ax[0].plot(time[gradient_peak], smoothed_envelope[gradient_peak], 'x', color='red')
 
-    # Compute the Fourier Transform
-    n = len(data)
-    fourier = fft.fft(data) / n
-    freq = fft.fftfreq(n, 1/sample_rate)
-    spectrum_freq = freq[:n//2]
-    spectrum_mag = np.abs(fourier)[:n//2]
+    spectrum_freq, spectrum_mag = freq_analysis(data, sample_rate)
     ax[1].plot(spectrum_freq, spectrum_mag, linewidth=0.6, alpha = 0.9, color='black')
     ax[1].set_xlabel('Frequency (Hz)')
     ax[1].set_ylabel('Amplitude')
@@ -55,4 +67,19 @@ if __name__ == '__main__':
     for peak in peaks:
         print('Peak frequency:', spectrum_freq[peak])
         print('Peak note:', freq_to_note(spectrum_freq[peak]))
-    plt.show()
+        ax[1].text(spectrum_freq[peak], spectrum_mag[peak], freq_to_note(spectrum_freq[peak]), fontsize=8, color='blue')
+    # plt.show()
+
+    output = pd.DataFrame(columns=['Note', 'Duration'])
+    time_interval = gradient_peak
+    for i in range(len(time_interval)-1):
+        start = time_interval[i]
+        end = time_interval[i+1]
+        spectrum_freq, spectrum_mag = freq_analysis(data[start:end], sample_rate)
+        peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.3, distance=50)
+        print('Note:', freq_to_note(spectrum_freq[peaks]))
+        output.loc[i] = [freq_to_note(spectrum_freq[peaks]), (end-start)/sample_rate]
+    output['index'] = output.index
+    output = output[['index', 'Note', 'Duration']]
+    print(output)
+    output.to_csv('./software/tmp/notes_file.csv', index=False)
