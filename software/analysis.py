@@ -5,10 +5,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# TODO: need to find start of a new note by finding sharp increases in amplitude
+def load_test_data(path, start_sec, end_sec):
+    sample_rate, data = wavfile.read(path) # data has two channels, left and right
+    data = data[:, 0]  # Use only one channel
+    time = np.arange(0, float(data.shape[0]), 1) / sample_rate
+    # Use only the first few seconds for testing purposes
+    time = time[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
+    data = data[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
+
+    print('Load test data successful! ')
+    print('Sample rate:', sample_rate)
+    print('Total samples:', len(data))
+    print('Duration:', len(data) / sample_rate, 'seconds')
+    print('-----------------------------------')
+    return time, data, sample_rate
 
 def freq_to_note(freq):
-    note_freq_table = pd.read_csv('./software/note_frequency_conversion.csv')
+    note_freq_table = pd.read_csv('./software/lib/note_frequency_conversion.csv')
     note_freq_table = note_freq_table.astype({'Frequency': float, 'Note': str})
     note_freq_table['offset'] = note_freq_table['Frequency'] - freq
     note_freq_table['offset'] = abs(note_freq_table['offset'])
@@ -25,6 +38,7 @@ def freq_analysis(data, sample_rate):
 
 def extract_intervals(data): 
     # output: list of intervals, each interval is a list of two elements: the data and the duration in seconds
+    # interval edegs are detected by large positive gradient of the smoothed envelope
     envelope = abs(signal.hilbert(data))
     smoothed_envelope = signal.savgol_filter(envelope, 800, 3)
     gradient = np.gradient(smoothed_envelope)
@@ -33,22 +47,18 @@ def extract_intervals(data):
     for i in range(len(gradient_peak)-1):
         start = gradient_peak[i]
         end = gradient_peak[i+1]
-        intervals.append([data[start:end], (end-start)/sample_rate])
+        intervals.append(data[start:end])
     return intervals
 
-if __name__ == '__main__':
-    sample_rate, data = wavfile.read('./software/test.wav') # data has two channels, left and right
-    data = data[:, 0]  # Use only one channel
-    start_sec = 0.0
-    end_sec = 5
-    time = np.arange(0, float(data.shape[0]), 1) / sample_rate
-    # Use only the first few seconds for testing purposes
-    time = time[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
-    data = data[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
+def extract_note_and_duration(interval, sample_rate):
+    spectrum_freq, spectrum_mag = freq_analysis(interval, sample_rate)
+    peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.3, distance=50)
+    note = freq_to_note(spectrum_freq[peaks])
+    duration = len(interval) / sample_rate
+    return note, duration
 
-    print('Sample rate:', sample_rate)
-    print('Total samples:', len(data))
-    print('Duration:', len(data) / sample_rate, 'seconds')
+if __name__ == '__main__':
+    time, data, sample_rate = load_test_data('./software/lib/test.wav', 0, 5)
 
     if False:
         # Plot the time domain
@@ -86,6 +96,5 @@ if __name__ == '__main__':
 
     intervals = extract_intervals(data)
     for interval in intervals:
-        spectrum_freq, spectrum_mag = freq_analysis(interval[0], sample_rate)
-        peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.3, distance=50)
-        print('Note:', freq_to_note(spectrum_freq[peaks]), 'Duration:', interval[1], 'seconds')
+        note, duration = extract_note_and_duration(interval, sample_rate)
+        print('Note:', note, 'Duration:', duration)
