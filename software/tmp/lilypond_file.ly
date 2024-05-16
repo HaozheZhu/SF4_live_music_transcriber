@@ -1,18 +1,7 @@
-\version "2.24.3"
-
-\header { }
-
-melody = {
-  \clef treble
-  \key c \major
-  \time 4/4
-
-  a' b' c'' d' a' r4. f''8
+\version "2.18.2"
+\header {
+  title = "Generated Music"
+  composer = "hz403 and rw680"
+  tagline = ##f
 }
-
-\score {
-  \new Staff \melody
-  \layout { }
-  \midi { }
-}
-
+{ c8 d8 e4 f2 }

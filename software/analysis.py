@@ -36,7 +36,7 @@ def freq_analysis(data, sample_rate):
     spectrum_mag = np.abs(fourier)[:n//2]
     return spectrum_freq, spectrum_mag
 
-def extract_intervals(data): 
+def extract_intervals(data, sample_rate): 
     # output: list of intervals, each interval is a list of two elements: the data and the duration in seconds
     # interval edegs are detected by large positive gradient of the smoothed envelope
     envelope = abs(signal.hilbert(data))
@@ -94,7 +94,7 @@ if __name__ == '__main__':
             ax[1].text(spectrum_freq[peak], spectrum_mag[peak], freq_to_note(spectrum_freq[peak]), fontsize=8, color='blue')
         plt.show()
 
-    intervals = extract_intervals(data)
+    intervals = extract_intervals(data, sample_rate)
     for interval in intervals:
         note, duration = extract_note_and_duration(interval, sample_rate)
         print('Note:', note, 'Duration:', duration)
