@@ -4,9 +4,10 @@ void setup() {
   // put your setup code here, to run once:
   pinMode(ANALOG_PIN0, INPUT);
   Serial.begin(9600);
+  
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  // Turn-on Turn-off mechanism using mechanical button to begin/end the recording
 }
