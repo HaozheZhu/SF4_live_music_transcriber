@@ -11,7 +11,7 @@ void setup() {
     sendValue(512);
 }
 uint32_t period = 100000; // microseconds
-uint32_t samples_per_period = 400;
+uint32_t samples_per_period = 100;
 uint32_t sample_period = period / samples_per_period;
 uint16_t value; 
 uint32_t current_sample_time = 0;  
