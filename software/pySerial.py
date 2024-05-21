@@ -1,9 +1,11 @@
 import serial
+from time import perf_counter
 
 if __name__ == '__main__':
     ser = serial.Serial()
     ser.baudrate = 230400
     ser.port = '/dev/ttyACM0'
+    # ser.port = 'COM3'
     print(ser)         # check which port was really used
     
     ser.open()
@@ -14,5 +16,5 @@ if __name__ == '__main__':
         data = ser.read(2)
         datalist = list(data)
         data = (datalist[0] << 8) + datalist[1]
-        print(data)
+        print(f'{perf_counter()}, \t{data}')
     
