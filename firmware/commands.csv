@@ -1,0 +1,3 @@
+command, hex, dec, char
+start_recording_PC_to_Arduino, , 'S'
+start_recording_confirmation_Arduino_to_PC, 0xFFF2, 65522
