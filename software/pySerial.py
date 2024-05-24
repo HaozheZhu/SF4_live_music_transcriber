@@ -22,7 +22,7 @@ def print_data(data):
     print(data)
 
 def starting_routine(ser): 
-    while input("Type 'S' to start: ") not in ['S', 's']:
+    while input("Input 's' to start: ") not in ['S', 's']:
         pass
     ser.write('S'.encode())
     time.sleep(0.1)
@@ -35,7 +35,10 @@ def starting_routine(ser):
 
 if __name__ == '__main__':
     ser = serial_setup()
-
+    print("Please reset the Arduino")
+    while ser.read(1) != b'R':
+        pass
+    print("Arduino ready")
     starting_routine(ser)
 
     while True:

@@ -27,6 +27,7 @@ void setup() {
     Serial.begin(230400);
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH); // turn on LED to indicate that Arduino is ready to start
+    Serial.write('R'); // send ready signal to PC
     starting_routine();
 }
 
