@@ -5,9 +5,7 @@ void sendValue(uint16_t value) {
     Serial.write(value & 0xff);
 }
 
-void setup() {
-    Serial.begin(230400);
-    delay(1000);
+void starting_routine() {
     uint8_t buf[1];
     Serial.readBytes(buf, 1); 
     while(buf[0] != 0x53) {
@@ -16,6 +14,13 @@ void setup() {
     delay(500); 
     sendValue(0xFFF2);
 }
+
+void setup() {
+    Serial.begin(230400);
+    delay(1000);
+    starting_routine();
+}
+
 uint32_t period = 1000000; // microseconds
 uint32_t samples_per_period = 100;
 uint32_t sample_period = period / samples_per_period;

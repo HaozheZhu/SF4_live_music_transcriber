@@ -11,15 +11,7 @@ def print_data(data):
     print(time.time(), end=" ")
     print(data)
 
-if __name__ == '__main__':
-    ser = serial.Serial()
-    ser.baudrate = 230400
-    ser.port = '/dev/ttyACM4'
-    print(ser)         # check which port was really used
-    
-    ser.open()
-    print(ser.is_open) # True for opened port
-
+def starting_routine(ser): 
     time.sleep(5)
     ser.write('S'.encode())
     time.sleep(0.1)
@@ -29,6 +21,21 @@ if __name__ == '__main__':
         print_data(data)
         data = read_data(ser)
     print('Started') # Start confirmation received from Arduino
+
+def serial_setup(): 
+    ser = serial.Serial()
+    ser.baudrate = 230400
+    ser.port = '/dev/ttyACM4'
+    print(ser)         # check which port was really used
+    
+    ser.open()
+    print(ser.is_open) # True for opened port
+    return ser
+
+if __name__ == '__main__':
+    ser = serial_setup()
+
+    starting_routine(ser)
 
     while True:
         data = read_data(ser)

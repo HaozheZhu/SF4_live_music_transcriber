@@ -1,4 +1,4 @@
 COMMAND,DIRECTION,HEX,DEC,CHAR
 waiting for start command,A to PC," 0xFFF1",65521,
-start recording,PC to A," ",," 'S'"
+start recording,PC to A,0x53,,S
 start recording confirmation,A to PC," 0xFFF2"," 65522",
