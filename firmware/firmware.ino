@@ -13,10 +13,11 @@ void starting_routine() {
     }
     delay(500); 
     sendValue(0xFFF2);
+    digitalWrite(13, LOW); // turn off LED to indicate that Arduino has started
 }
 
 uint32_t period = 1000000; // microseconds
-uint32_t samples_per_period = 100;
+uint32_t samples_per_period = 1000;
 uint32_t sample_period = period / samples_per_period;
 uint16_t value; 
 uint32_t current_sample_time = 0; 
@@ -24,6 +25,8 @@ uint32_t elapsed_time = 0;
 
 void setup() {
     Serial.begin(230400);
+    pinMode(13, OUTPUT);
+    digitalWrite(13, HIGH); // turn on LED to indicate that Arduino is ready to start
     starting_routine();
 }
 

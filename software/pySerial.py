@@ -1,6 +1,16 @@
 import serial
 import time
 
+def serial_setup(): 
+    ser = serial.Serial()
+    ser.baudrate = 230400
+    ser.port = '/dev/ttyACM0'
+    print(ser)         # check which port was really used
+    
+    ser.open()
+    print(ser.is_open) # True for opened port
+    return ser
+
 def read_data(ser):
     data = ser.read(2)
     datalist = list(data)
@@ -22,16 +32,6 @@ def starting_routine(ser):
         print_data(data)
         data = read_data(ser)
     print('Started') # Start confirmation received from Arduino
-
-def serial_setup(): 
-    ser = serial.Serial()
-    ser.baudrate = 230400
-    ser.port = '/dev/ttyACM4'
-    print(ser)         # check which port was really used
-    
-    ser.open()
-    print(ser.is_open) # True for opened port
-    return ser
 
 if __name__ == '__main__':
     ser = serial_setup()
