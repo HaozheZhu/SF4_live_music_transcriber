@@ -12,7 +12,8 @@ def print_data(data):
     print(data)
 
 def starting_routine(ser): 
-    time.sleep(5)
+    while input("Type 'S' to start: ") not in ['S', 's']:
+        pass
     ser.write('S'.encode())
     time.sleep(0.1)
     print("Starting")

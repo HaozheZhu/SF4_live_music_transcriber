@@ -15,18 +15,17 @@ void starting_routine() {
     sendValue(0xFFF2);
 }
 
-void setup() {
-    Serial.begin(230400);
-    delay(1000);
-    starting_routine();
-}
-
 uint32_t period = 1000000; // microseconds
 uint32_t samples_per_period = 100;
 uint32_t sample_period = period / samples_per_period;
 uint16_t value; 
 uint32_t current_sample_time = 0; 
 uint32_t elapsed_time = 0;
+
+void setup() {
+    Serial.begin(230400);
+    starting_routine();
+}
 
 void loop() {
     for (int i = 0; i < samples_per_period; i++) {
