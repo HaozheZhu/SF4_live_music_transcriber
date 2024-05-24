@@ -1,3 +1,4 @@
-command, hex, dec, char
-start_recording_PC_to_Arduino, , 'S'
-start_recording_confirmation_Arduino_to_PC, 0xFFF2, 65522
+COMMAND,DIRECTION,HEX,DEC,CHAR
+waiting for start command,A to PC," 0xFFF1",65521,
+start recording,PC to A," ",," 'S'"
+start recording confirmation,A to PC," 0xFFF2"," 65522",
