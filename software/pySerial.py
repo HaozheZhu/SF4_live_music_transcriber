@@ -35,7 +35,7 @@ def starting_routine(ser):
 
 if __name__ == '__main__':
     ser = serial_setup()
-    print("Please reset the Arduino")
+    print("Please reset the Arduino (sometimes it is done automatically)")
     while ser.read(1) != b'R':
         pass
     print("Arduino ready")
