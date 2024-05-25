@@ -1,10 +1,9 @@
 #define PI 3.1415926535897932384626433832795
 
 uint32_t period = 1000000; // microseconds
-uint32_t samples_per_period = 1000;
+uint32_t samples_per_period = 4500;
 uint32_t sample_period = period / samples_per_period;
 uint32_t current_sample_time = 0; 
-uint32_t elapsed_time = 0;
 
 void sendValue(uint16_t value) {
     Serial.write(value >> 8);
@@ -17,7 +16,7 @@ void starting_routine() {
     while(buf[0] != 0x53) {
         Serial.readBytes(buf, 1); 
     }
-    delay(500); 
+    delay(10); 
     sendValue(0xFFF2);
     digitalWrite(13, LOW); // turn off LED to indicate that Arduino has started
 }
@@ -32,13 +31,13 @@ uint16_t sample_ADC() {
 
 // runs the function pointed by funcptr repeatedly
 void timer_routine(uint16_t(*funcptr)()) {
+    uint32_t elapsed_time = 0;
     while (elapsed_time < sample_period) {
-        elapsed_time = micros() - current_sample_time;
+        elapsed_time = micros() - current_sample_time; // here, current_sample_time is previous sample time
     }
     current_sample_time = micros();
     uint16_t value = funcptr();
     sendValue(value);
-    elapsed_time = 0;
 }
 
 void setup() {
@@ -50,8 +49,5 @@ void setup() {
 }
 
 void loop() {
-    for (int i = 0; i < samples_per_period; i++) {
-        timer_routine(dummy_data_generation);
-    }
-    while(1); 
+    timer_routine(dummy_data_generation);
 }
