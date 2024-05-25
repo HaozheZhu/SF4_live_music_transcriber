@@ -17,5 +17,3 @@ if __name__ == '__main__':
     print('-----------------------------------')
     print('Notes:', notes)
     print('Durations:', durations)
-
-    
