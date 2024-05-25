@@ -35,6 +35,7 @@ void timer_routine(uint16_t(*funcptr)()) {
     while (elapsed_time < sample_period) {
         elapsed_time = micros() - current_sample_time;
     }
+    uint8_t buf[2];
     current_sample_time = micros();
     uint16_t value = funcptr();
     sendValue(value);
@@ -49,8 +50,5 @@ void setup() {
 }
 
 void loop() {
-    for (int i = 0; i < samples_per_period; i++) {
-        timer_routine(dummy_data_generation);
-    }
-    while(1); 
+    timer_routine(dummy_data_generation);
 }

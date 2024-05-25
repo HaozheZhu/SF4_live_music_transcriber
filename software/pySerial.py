@@ -39,17 +39,30 @@ def Arduino_reset(ser):
     print("Please reset the Arduino (usually automatic)")
     while ser.read(1) != b'R':
         pass
-    print("Arduino reset and ready")
-    starting_routine(ser)
-    
+    print("Arduino reset and ready")    
 
 if __name__ == '__main__':
     ser = serial_setup()
     Arduino_reset(ser)
-    data_list = []
+    starting_routine(ser)
+    print("Recording data, press Ctrl+C to stop")
 
-    while True:
-        data = read_data(ser)
-        data_list.append(data)
-        print_data(data)
+    try: 
+        data_list = []
+        start_time = time.time()
+        while True:
+            data = read_data(ser)
+            data_list.append((time.time()-start_time, data))
+    except KeyboardInterrupt:
+        print("Exiting...")
+        ser.close()
+        print("=====================================")
+        print("Number of data points: ", len(data_list))
+        print("Time elapsed: ", time.time()-start_time)
+        print("First 10 data points: ")
+        for i in range(10): 
+            print(data_list[i])
+        print("Last 10 data points: ")
+        for i in range(-10, 0): 
+            print(data_list[i])
     
