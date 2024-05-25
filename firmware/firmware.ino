@@ -1,7 +1,7 @@
 #define PI 3.1415926535897932384626433832795
 
 uint32_t period = 1000000; // microseconds
-uint32_t samples_per_period = 4000;
+uint32_t samples_per_period = 4500;
 uint32_t sample_period = period / samples_per_period;
 uint32_t current_sample_time = 0; 
 
@@ -33,9 +33,8 @@ uint16_t sample_ADC() {
 void timer_routine(uint16_t(*funcptr)()) {
     uint32_t elapsed_time = 0;
     while (elapsed_time < sample_period) {
-        elapsed_time = micros() - current_sample_time;
+        elapsed_time = micros() - current_sample_time; // here, current_sample_time is previous sample time
     }
-    uint8_t buf[2];
     current_sample_time = micros();
     uint16_t value = funcptr();
     sendValue(value);

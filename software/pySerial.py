@@ -61,6 +61,7 @@ if __name__ == '__main__':
         print("=====================================")
         print("Number of data points: ", len(data_list))
         print("Time elapsed: ", time.time()-start_time)
+        print("Sample rate: ", len(data_list)/data_list[-1][0])
         df = pd.DataFrame(data_list, columns=['Time', 'Data'])
         df.to_csv('./software/tmp/data.csv', index=False)
         print(df.head())
