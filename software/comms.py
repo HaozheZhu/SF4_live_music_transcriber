@@ -6,7 +6,10 @@ import matplotlib.pyplot as plt
 def serial_setup(): 
     ser = serial.Serial()
     ser.baudrate = 230400
+    # For Linux
     ser.port = '/dev/ttyACM0'
+    # For Windows
+    ser.port = 'COM4'
     ser.open()
     if ser.is_open:
         print("Serial setup complete")
