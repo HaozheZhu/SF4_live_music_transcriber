@@ -1,9 +1,10 @@
 import numpy as np
 import scipy.io.wavfile as wavfile
 import analysis
+import comms
 
 if __name__ == '__main__':
-    time, data, sample_rate = analysis.load_test_data('./software/lib/test.wav', 0, 5)
+    time, data, sample_rate = analysis.load_test_data('./software/_lib/test.wav', 0, 5)
     intervals = analysis.extract_intervals(data, sample_rate)
     notes = []
     durations = []

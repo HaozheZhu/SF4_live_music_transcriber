@@ -20,9 +20,14 @@ def create_lilypond_file(music):
 
 if __name__ == "__main__":
     music = lily.Document(lily.MusicList())
-    music[0].append(lily.Note('c', lily.Duration(fractions.Fraction(1, 8))))
+    music[0].append(lily.Note('c',
+                              lily.Octave(1), # octave relative to C3 i.e. 0 is C3
+                              lily.Duration(fractions.Fraction(1, 8)), 
+                              )
+                    )
     music[0].append(lily.Note('d', lily.Duration(fractions.Fraction(1, 8))))
     music[0].append(lily.Note('e', lily.Duration(fractions.Fraction(1, 4))))
+    music[0].append(lily.Note('f', lily.Duration(fractions.Fraction(1, 2))))
     music[0].append(lily.Note('f', lily.Duration(fractions.Fraction(1, 2))))
 
 

@@ -21,7 +21,7 @@ def load_test_data(path, start_sec, end_sec):
     return time, data, sample_rate
 
 def freq_to_note(freq):
-    note_freq_table = pd.read_csv('./software/lib/note_frequency_conversion.csv')
+    note_freq_table = pd.read_csv('./software/_lib/note_frequency_conversion.csv')
     note_freq_table = note_freq_table.astype({'Frequency': float, 'Note': str})
     note_freq_table['offset'] = note_freq_table['Frequency'] - freq
     note_freq_table['offset'] = abs(note_freq_table['offset'])
