@@ -1,7 +1,7 @@
 #define PI 3.1415926535897932384626433832795
 
 uint32_t period = 1000000; // microseconds
-uint32_t samples_per_period = 1000;
+uint32_t samples_per_period = 4000;
 uint32_t sample_period = period / samples_per_period;
 uint32_t current_sample_time = 0; 
 

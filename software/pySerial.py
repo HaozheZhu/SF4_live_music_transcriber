@@ -1,5 +1,7 @@
 import serial
 import time
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def serial_setup(): 
     ser = serial.Serial()
@@ -59,10 +61,10 @@ if __name__ == '__main__':
         print("=====================================")
         print("Number of data points: ", len(data_list))
         print("Time elapsed: ", time.time()-start_time)
-        print("First 10 data points: ")
-        for i in range(10): 
-            print(data_list[i])
-        print("Last 10 data points: ")
-        for i in range(-10, 0): 
-            print(data_list[i])
+        df = pd.DataFrame(data_list, columns=['Time', 'Data'])
+        df.to_csv('./software/tmp/data.csv', index=False)
+        print(df.head())
+        plt.plot(df['Time'], df['Data'])
+        plt.show()
+
     
