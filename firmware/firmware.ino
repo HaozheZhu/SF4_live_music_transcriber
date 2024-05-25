@@ -49,5 +49,6 @@ void setup() {
 }
 
 void loop() {
-    timer_routine(dummy_data_generation);
+    // timer_routine(dummy_data_generation);
+    timer_routine(sample_ADC);
 }

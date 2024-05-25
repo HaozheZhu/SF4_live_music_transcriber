@@ -54,16 +54,19 @@ if __name__ == '__main__':
 
     try: 
         data_list = []
-        start_time = time.time()
+        # start_time = time.time()
+        start_time = time.perf_counter()
         while True:
             data = read_data(ser)
-            data_list.append((time.time()-start_time, data))
+            # data_list.append((time.time()-start_time, data))
+            data_list.append((time.perf_counter()-start_time, data))
     except KeyboardInterrupt:
         print("Exiting...")
         ser.close()
         print("=====================================")
         print("Number of data points: ", len(data_list))
-        print("Time elapsed: ", time.time()-start_time)
+        # print("Time elapsed: ", time.time()-start_time)
+        print("Time elapsed: ", time.perf_counter()-start_time)
         print("Sample rate: ", len(data_list)/data_list[-1][0])
         df = pd.DataFrame(data_list, columns=['Time', 'Data'])
         df.to_csv('./software/tmp/data.csv', index=False)
