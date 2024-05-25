@@ -1,0 +1,4 @@
+ORDER,COMMAND,DIRECTION,HEX,DEC,CHAR
+1,Arduino ready to start recording,A to PC,,,R
+2,start recording,PC to A,0x53,,S
+3,start recording confirmation,A to PC," 0xFFF2"," 65522",
