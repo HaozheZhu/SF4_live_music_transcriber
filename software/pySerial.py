@@ -5,10 +5,12 @@ def serial_setup():
     ser = serial.Serial()
     ser.baudrate = 230400
     ser.port = '/dev/ttyACM0'
-    print(ser)         # check which port was really used
-    
     ser.open()
-    print(ser.is_open) # True for opened port
+    if ser.is_open:
+        print("Serial setup complete")
+    else:
+        print("Serial setup failed, exiting")
+        raise SystemExit
     return ser
 
 def read_data(ser):
@@ -25,23 +27,29 @@ def starting_routine(ser):
     while input("Input 's' to start: ") not in ['S', 's']:
         pass
     ser.write('S'.encode())
-    time.sleep(0.1)
-    print("Starting")
+    time.sleep(0.01)
+    print("Starting to record")
     data = read_data(ser)
     while data != 0xFFF2:
         print_data(data)
         data = read_data(ser)
     print('Started') # Start confirmation received from Arduino
 
-if __name__ == '__main__':
-    ser = serial_setup()
-    print("Please reset the Arduino (sometimes it is done automatically)")
+def Arduino_reset(ser):
+    print("Please reset the Arduino (usually automatic)")
     while ser.read(1) != b'R':
         pass
-    print("Arduino ready")
+    print("Arduino reset and ready")
     starting_routine(ser)
+    
+
+if __name__ == '__main__':
+    ser = serial_setup()
+    Arduino_reset(ser)
+    data_list = []
 
     while True:
         data = read_data(ser)
+        data_list.append(data)
         print_data(data)
     
