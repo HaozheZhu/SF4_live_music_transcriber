@@ -22,7 +22,7 @@ def load_test_data_wav(path, start_sec, end_sec):
 
 def load_test_data_csv(path, start_sec, end_sec):
     df = pd.read_csv(path)
-    sample_rate = len(df) / df.iloc[-1]['Time']
+    sample_rate = int(len(df) / df.iloc[-1]['Time'])
 
     # Use only the first few seconds for testing purposes
     time = df['Time'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
@@ -68,9 +68,18 @@ def extract_intervals(data, sample_rate):
 def extract_note_and_duration(interval, sample_rate):
     spectrum_freq, spectrum_mag = freq_analysis(interval, sample_rate)
     peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.3, distance=50)
-    note = freq_to_note(spectrum_freq[peaks])
+    notes = []
+    for peak in peaks:
+        freq = spectrum_freq[peak]
+        note = freq_to_note(freq)
+        notes.append(note)
+    # print(f'peaks: {spectrum_freq[peaks]}')
+    # note = freq_to_note(spectrum_freq[peaks])
     duration = len(interval) / sample_rate
-    return note, duration
+    if notes:
+        most_frequent_note = max(set(notes), key=notes.count)
+        return most_frequent_note, duration
+    return None, duration
 
 def butter_lowpass_filter(data, cutoff, fs, order):
     normal_cutoff = cutoff / (0.5 * fs)
@@ -80,10 +89,10 @@ def butter_lowpass_filter(data, cutoff, fs, order):
     return y
 
 if __name__ == '__main__':
-    time, data, sample_rate = load_test_data_wav('./software/_lib/test.wav', 0, 5)
+    # time, data, sample_rate = load_test_data_wav('./software/_lib/test.wav', 0, 5)
     # time, data, sample_rate = load_test_data_csv('./software/_lib/test_recording_data.csv', 0, 5)
     # time, data, sample_rate = load_test_data_csv('./software/_lib/data.csv', 0, 5)
-    # time, data, sample_rate = load_test_data_csv('./software/tmp/data.csv', 0, 5)
+    time, data, sample_rate = load_test_data_csv('./software/tmp/data.csv', 0, 5)
     time = np.linspace(0, len(data)/sample_rate, len(data))
     data = np.array(data)
     data = data - np.mean(data)
@@ -122,9 +131,12 @@ if __name__ == '__main__':
             print('Peak frequency:', spectrum_freq[peak])
             print('Peak note:', freq_to_note(spectrum_freq[peak]))
             ax[1].text(spectrum_freq[peak], spectrum_mag[peak], freq_to_note(spectrum_freq[peak]), fontsize=8, color='blue')
+        plt.savefig('./software/tmp/analysis.png')
         plt.show()
 
     intervals = extract_intervals(data, sample_rate)
     for interval in intervals:
         note, duration = extract_note_and_duration(interval, sample_rate)
         print('Note:', note, 'Duration:', duration)
+    
+    wavfile.write('./software/tmp/filtered.wav', sample_rate, data.astype(np.int16)*80)
