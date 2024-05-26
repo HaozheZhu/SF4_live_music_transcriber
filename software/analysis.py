@@ -72,15 +72,29 @@ def extract_note_and_duration(interval, sample_rate):
     duration = len(interval) / sample_rate
     return note, duration
 
-if __name__ == '__main__':
-    # time, data, sample_rate = load_test_data_wav('./software/_lib/test.wav', 0, 5)
-    # time, data, sample_rate = load_test_data_csv('./software/_lib/test_recording_data.csv', 0, 5)
-    time, data, sample_rate = load_test_data_csv('./software/tmp/data.csv', 0, 5)
+def butter_lowpass_filter(data, cutoff, fs, order):
+    normal_cutoff = cutoff / (0.5 * fs)
+    # Get the filter coefficients 
+    b, a = signal.butter(order, normal_cutoff, btype='low', analog=False)
+    y = signal.filtfilt(b, a, data)
+    return y
 
+if __name__ == '__main__':
+    time, data, sample_rate = load_test_data_wav('./software/_lib/test.wav', 0, 5)
+    # time, data, sample_rate = load_test_data_csv('./software/_lib/test_recording_data.csv', 0, 5)
+    # time, data, sample_rate = load_test_data_csv('./software/_lib/data.csv', 0, 5)
+    # time, data, sample_rate = load_test_data_csv('./software/tmp/data.csv', 0, 5)
+    time = np.linspace(0, len(data)/sample_rate, len(data))
+    data = np.array(data)
+    data = data - np.mean(data)
+    # data = butter_lowpass_filter(data, 500, sample_rate, 3)
+    # data = signal.savgol_filter(data, 5, 3)
+    
     if True:
         # Plot the time domain
         fig, ax = plt.subplots(3, 1)
-        ax[0].plot(time, data, 'o', linewidth=0.6, alpha = 0.9, color='black')
+        ax[0].plot(time, data, '-', linewidth=0.6, alpha = 0.9, color='black')
+        ax[0].plot(time, data, 'x', linewidth=0.6, alpha = 0.9, color='black')
         ax[0].set_xlabel('Time (s)')
         ax[0].set_ylabel('Amplitude')
         ax[0].set_title('Audio Signal (time domain)')
@@ -88,10 +102,10 @@ if __name__ == '__main__':
         ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='blue')
         ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='red')
         gradient = np.gradient(envelope)
-        gradient_peak, _ = signal.find_peaks(gradient, height=max(gradient)*0.1, distance=int(sample_rate*0.05))
+        gradient_peak, _ = signal.find_peaks(gradient, height=max(gradient)*0.3, distance=int(sample_rate*0.05))
         ax[2].plot(time, gradient, linewidth=0.6, alpha = 0.9, color='green')
-        ax[2].plot(time[gradient_peak], gradient[gradient_peak], 'x', color='red')
-        ax[0].plot(time[gradient_peak], envelope[gradient_peak], 'x', color='red')
+        ax[2].plot(time[gradient_peak], gradient[gradient_peak], 'x', color='blue')
+        ax[0].plot(time[gradient_peak], envelope[gradient_peak], 'x', color='blue')
 
         spectrum_freq, spectrum_mag = freq_analysis(data, sample_rate)
         ax[1].plot(spectrum_freq, spectrum_mag, linewidth=0.6, alpha = 0.9, color='black')
