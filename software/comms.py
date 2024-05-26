@@ -2,12 +2,13 @@ import serial
 import time
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 def serial_setup(): 
     ser = serial.Serial()
     ser.baudrate = 230400
     # For Linux
-    ser.port = '/dev/ttyACM0'
+    ser.port = '/dev/ttyACM2'
     # For Windows
     # ser.port = 'COM4'
     ser.open()
@@ -68,7 +69,10 @@ if __name__ == '__main__':
         df = pd.DataFrame(data_list, columns=['Time', 'Data'])
         df.to_csv('./software/tmp/data.csv', index=False)
         print(df.head())
-        plt.plot(df['Time'], df['Data'])
+        sampling_rate = 2000
+        time = np.arange(0, len(data_list)/sampling_rate, 1/sampling_rate)
+        plt.plot(time, df['Data'], 'o')
+        # plt.plot(df['Time'], df['Data'], 'o')
         plt.show()
 
     

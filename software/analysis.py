@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def load_test_data(path, start_sec, end_sec):
+def load_test_data_wav(path, start_sec, end_sec):
     sample_rate, data = wavfile.read(path) # data has two channels, left and right
     data = data[:, 0]  # Use only one channel
     time = np.arange(0, float(data.shape[0]), 1) / sample_rate
@@ -15,6 +15,21 @@ def load_test_data(path, start_sec, end_sec):
 
     print('Load test data successful! ')
     print('Sample rate:', sample_rate)
+    print('Total samples:', len(data))
+    print('Duration:', len(data) / sample_rate, 'seconds')
+    print('-----------------------------------')
+    return time, data, sample_rate
+
+def load_test_data_csv(path, start_sec, end_sec):
+    df = pd.read_csv(path)
+    sample_rate = len(df) / df.iloc[-1]['Time']
+
+    # Use only the first few seconds for testing purposes
+    time = df['Time'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
+    data = df['Data'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
+
+    print('Load test data successful! ')
+    print('Average sample rate:', sample_rate)
     print('Total samples:', len(data))
     print('Duration:', len(data) / sample_rate, 'seconds')
     print('-----------------------------------')
@@ -58,24 +73,25 @@ def extract_note_and_duration(interval, sample_rate):
     return note, duration
 
 if __name__ == '__main__':
-    time, data, sample_rate = load_test_data('./software/lib/test.wav', 0, 5)
+    # time, data, sample_rate = load_test_data_wav('./software/_lib/test.wav', 0, 5)
+    # time, data, sample_rate = load_test_data_csv('./software/_lib/test_recording_data.csv', 0, 5)
+    time, data, sample_rate = load_test_data_csv('./software/tmp/data.csv', 0, 5)
 
-    if False:
+    if True:
         # Plot the time domain
         fig, ax = plt.subplots(3, 1)
-        ax[0].plot(time, data, linewidth=0.6, alpha = 0.9, color='black')
+        ax[0].plot(time, data, 'o', linewidth=0.6, alpha = 0.9, color='black')
         ax[0].set_xlabel('Time (s)')
         ax[0].set_ylabel('Amplitude')
         ax[0].set_title('Audio Signal (time domain)')
         envelope = abs(signal.hilbert(data))
-        smoothed_envelope = signal.savgol_filter(envelope, 800, 3)
         ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='blue')
-        ax[0].plot(time, smoothed_envelope, linewidth=0.6, alpha = 0.9, color='red')
-        gradient = np.gradient(smoothed_envelope)
-        gradient_peak, _ = signal.find_peaks(gradient, height=max(gradient)*0.3, distance=int(sample_rate*0.05))
+        ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='red')
+        gradient = np.gradient(envelope)
+        gradient_peak, _ = signal.find_peaks(gradient, height=max(gradient)*0.1, distance=int(sample_rate*0.05))
         ax[2].plot(time, gradient, linewidth=0.6, alpha = 0.9, color='green')
         ax[2].plot(time[gradient_peak], gradient[gradient_peak], 'x', color='red')
-        ax[0].plot(time[gradient_peak], smoothed_envelope[gradient_peak], 'x', color='red')
+        ax[0].plot(time[gradient_peak], envelope[gradient_peak], 'x', color='red')
 
         spectrum_freq, spectrum_mag = freq_analysis(data, sample_rate)
         ax[1].plot(spectrum_freq, spectrum_mag, linewidth=0.6, alpha = 0.9, color='black')
