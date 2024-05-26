@@ -67,6 +67,7 @@ if __name__ == '__main__':
         print("Time elapsed: ", time.perf_counter()-start_time)
         print("Sample rate: ", len(data_list)/data_list[-1][0])
 
+        # Remove DC offset
         data_list = np.array(data_list)
         data_list[:, 1] = data_list[:, 1] - np.mean(data_list[:, 1])
 
