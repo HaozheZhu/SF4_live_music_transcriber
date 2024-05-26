@@ -69,7 +69,8 @@ if __name__ == '__main__':
 
         # Remove DC offset
         data_list = np.array(data_list)
-        data_list[:, 1] = data_list[:, 1] - np.mean(data_list[:, 1])
+        print(f'MEAN: {int(np.mean(data_list[:, 1]))}')
+        data_list[:, 1] = (data_list[:, 1] - int(np.mean(data_list[:, 1]))).astype(int)
 
         df = pd.DataFrame(data_list, columns=['Time', 'Data'])
         df.to_csv('./software/tmp/data.csv', index=False)
