@@ -10,7 +10,7 @@ def serial_setup():
     # For Linux
     ser.port = '/dev/ttyACM2'
     # For Windows
-    # ser.port = 'COM4'
+    ser.port = 'COM4'
     ser.open()
     if ser.is_open:
         print("Serial setup complete")
@@ -66,13 +66,19 @@ if __name__ == '__main__':
         print("Number of data points: ", len(data_list))
         print("Time elapsed: ", time.perf_counter()-start_time)
         print("Sample rate: ", len(data_list)/data_list[-1][0])
+
+        data_list = np.array(data_list)
+        data_list[:, 1] = data_list[:, 1] - np.mean(data_list[:, 1])
+
         df = pd.DataFrame(data_list, columns=['Time', 'Data'])
         df.to_csv('./software/tmp/data.csv', index=False)
         print(df.head())
         sampling_rate = 2000
         time = np.arange(0, len(data_list)/sampling_rate, 1/sampling_rate)
-        plt.plot(time, df['Data'], 'o')
+        # plt.plot(time, df['Data'], 'o')
+        plt.plot(time, df['Data'])
         # plt.plot(df['Time'], df['Data'], 'o')
+        plt.savefig('./software/tmp/data.png')
         plt.show()
 
     
