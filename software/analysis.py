@@ -90,9 +90,9 @@ def butter_lowpass_filter(data, cutoff, fs, order):
 
 if __name__ == '__main__':
     # time, data, sample_rate = load_test_data_wav('./software/_lib/test.wav', 0, 5)
-    # time, data, sample_rate = load_test_data_csv('./software/_lib/test_recording_data.csv', 0, 5)
+    time, data, sample_rate = load_test_data_csv('./software/_lib/test_recording_data.csv', 0, 6)
     # time, data, sample_rate = load_test_data_csv('./software/_lib/data.csv', 0, 5)
-    time, data, sample_rate = load_test_data_csv('./software/tmp/data.csv', 0, 5)
+    # time, data, sample_rate = load_test_data_csv('./software/tmp/data.csv', 0, 5)
     time = np.linspace(0, len(data)/sample_rate, len(data))
     data = np.array(data)
     data = data - np.mean(data)
@@ -139,4 +139,4 @@ if __name__ == '__main__':
         note, duration = extract_note_and_duration(interval, sample_rate)
         print('Note:', note, 'Duration:', duration)
     
-    wavfile.write('./software/tmp/filtered.wav', sample_rate, data.astype(np.int16)*80)
+    wavfile.write('./software/tmp/filtered.wav', sample_rate, data.astype(np.int16)*50)
