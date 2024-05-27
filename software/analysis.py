@@ -1,9 +1,12 @@
 from scipy.io import wavfile
 import scipy.fft as fft
+import scipy.ndimage
 import scipy.signal as signal
+import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import scipy.signal
 
 def load_test_data_wav(path, start_sec, end_sec):
     sample_rate, data = wavfile.read(path) # data has two channels, left and right
@@ -13,7 +16,6 @@ def load_test_data_wav(path, start_sec, end_sec):
     time = time[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
     data = data[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
 
-    print('Load test data successful! ')
     print('Sample rate:', sample_rate)
     print('Total samples:', len(data))
     print('Duration:', len(data) / sample_rate, 'seconds')
@@ -28,11 +30,13 @@ def load_test_data_csv(path, start_sec, end_sec):
     time = df['Time'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
     data = df['Data'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
 
-    print('Load test data successful! ')
     print('Average sample rate:', sample_rate)
     print('Total samples:', len(data))
     print('Duration:', len(data) / sample_rate, 'seconds')
     print('-----------------------------------')
+    time = np.linspace(0, len(data)/sample_rate, len(data))
+    data = np.array(data)
+    data = data - np.mean(data)
     return time, data, sample_rate
 
 def freq_to_note(freq):
@@ -43,21 +47,31 @@ def freq_to_note(freq):
     note_freq_table = note_freq_table.sort_values(by='offset')
     return note_freq_table.iloc[0]['Note']
 
+def compute_envelope(data):
+    envelope = abs(signal.hilbert(data))
+
+    # DSP on envelope
+    envelope = scipy.ndimage.gaussian_filter1d(envelope, 50)
+    envelope = signal.savgol_filter(envelope, 7, 3)
+    envelope_log = np.log(envelope)
+
+    return envelope, envelope_log
+
 def freq_analysis(data, sample_rate): 
     n = len(data)
     fourier = fft.fft(data) / n
     freq = fft.fftfreq(n, 1/sample_rate)
     spectrum_freq = freq[:n//2]
     spectrum_mag = np.abs(fourier)[:n//2]
+    spectrum_mag = scipy.ndimage.gaussian_filter1d(spectrum_mag, 10)
     return spectrum_freq, spectrum_mag
 
-def extract_intervals(data, sample_rate): 
+def extract_intervals(data, sample_rate, MIN_PEAK_HEIGHT=0.1): 
     # output: list of intervals, each interval is a list of two elements: the data and the duration in seconds
     # interval edegs are detected by large positive gradient of the smoothed envelope
-    envelope = abs(signal.hilbert(data))
-    smoothed_envelope = signal.savgol_filter(envelope, 800, 3)
-    gradient = np.gradient(smoothed_envelope)
-    gradient_peak, _ = signal.find_peaks(gradient, height=max(gradient)*0.3, distance=int(sample_rate*0.05))
+    envelope, envelope_log = compute_envelope(data)
+    gradient = np.gradient(envelope)
+    gradient_peak, _ = signal.find_peaks(gradient, height=MIN_PEAK_HEIGHT, distance=int(sample_rate*0.05))
     intervals = []
     for i in range(len(gradient_peak)-1):
         start = gradient_peak[i]
@@ -96,8 +110,11 @@ if __name__ == '__main__':
     time = np.linspace(0, len(data)/sample_rate, len(data))
     data = np.array(data)
     data = data - np.mean(data)
+
+    # DSP on data
     # data = butter_lowpass_filter(data, 500, sample_rate, 3)
     # data = signal.savgol_filter(data, 5, 3)
+    
     
     if True:
         # Plot the time domain
@@ -107,14 +124,19 @@ if __name__ == '__main__':
         ax[0].set_xlabel('Time (s)')
         ax[0].set_ylabel('Amplitude')
         ax[0].set_title('Audio Signal (time domain)')
-        envelope = abs(signal.hilbert(data))
+        
+        envelope, envelope_log = compute_envelope(data)
+
         ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='blue')
         ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='red')
         gradient = np.gradient(envelope)
-        gradient_peak, _ = signal.find_peaks(gradient, height=max(gradient)*0.3, distance=int(sample_rate*0.05))
+        min_peak_height = 0.1
+        gradient_peak, _ = signal.find_peaks(gradient, height=min_peak_height, distance=int(sample_rate*0.05))
+        ax[2].set_title('Gradient of log(envelope)')
+        ax[2].axhline(min_peak_height, color='red')
         ax[2].plot(time, gradient, linewidth=0.6, alpha = 0.9, color='green')
-        ax[2].plot(time[gradient_peak], gradient[gradient_peak], 'x', color='blue')
-        ax[0].plot(time[gradient_peak], envelope[gradient_peak], 'x', color='blue')
+        ax[2].plot(time[gradient_peak], gradient[gradient_peak], 'o', color='red')
+        ax[0].plot(time[gradient_peak], envelope[gradient_peak], 'o', color='red')
 
         spectrum_freq, spectrum_mag = freq_analysis(data, sample_rate)
         ax[1].plot(spectrum_freq, spectrum_mag, linewidth=0.6, alpha = 0.9, color='black')
