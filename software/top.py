@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import subprocess
 
 if __name__ == '__main__':
-    # comms.receive('/dev/ttyACM0')
+    comms.receive('/dev/ttyACM0')
 
     # time, data, sample_rate = analysis.load_test_data_wav('./software/_lib/test.wav')
     # time, data, sample_rate = analysis.load_test_data_csv('./software/_lib/test_recording_data.csv')
