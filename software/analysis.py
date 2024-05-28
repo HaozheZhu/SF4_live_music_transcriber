@@ -16,6 +16,7 @@ def load_test_data_wav(path, start_sec, end_sec):
     time = time[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
     data = data[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
 
+    print("Loading WAV file:", path)
     print('Sample rate:', sample_rate)
     print('Total samples:', len(data))
     print('Duration:', len(data) / sample_rate, 'seconds')
@@ -30,6 +31,7 @@ def load_test_data_csv(path, start_sec, end_sec):
     time = df['Time'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
     data = df['Data'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
 
+    print("Loading CSV file:", path)
     print('Average sample rate:', sample_rate)
     print('Total samples:', len(data))
     print('Duration:', len(data) / sample_rate, 'seconds')
@@ -63,37 +65,71 @@ def freq_analysis(data, sample_rate):
     freq = fft.fftfreq(n, 1/sample_rate)
     spectrum_freq = freq[:n//2]
     spectrum_mag = np.abs(fourier)[:n//2]
-    spectrum_mag = scipy.ndimage.gaussian_filter1d(spectrum_mag, 10)
+    # spectrum_mag = scipy.ndimage.gaussian_filter1d(spectrum_mag, 3)
     return spectrum_freq, spectrum_mag
 
-def extract_intervals(data, sample_rate, MIN_PEAK_HEIGHT=0.1): 
+def extract_intervals(data, sample_rate, MIN_PEAK_HEIGHT=0.1, debug=False): 
     # output: list of intervals, each interval is a list of two elements: the data and the duration in seconds
     # interval edegs are detected by large positive gradient of the smoothed envelope
     envelope, envelope_log = compute_envelope(data)
     gradient = np.gradient(envelope)
     gradient_peak, _ = signal.find_peaks(gradient, height=MIN_PEAK_HEIGHT, distance=int(sample_rate*0.05))
+
     intervals = []
     for i in range(len(gradient_peak)-1):
         start = gradient_peak[i]
         end = gradient_peak[i+1]
         intervals.append(data[start:end])
+
+    
+    time = np.linspace(0, len(data)/sample_rate, len(data))
+    fig, ax = plt.subplots(2, 1, figsize=(20, 20))
+    fig.canvas.manager.set_window_title('Interval Extraction')
+    ax[0].plot(time, data, '-', linewidth=0.6, alpha = 0.9, color='black')
+    ax[0].plot(time, data, 'x', linewidth=0.6, alpha = 0.9, color='black')
+    ax[0].set_xlabel('Time (s)')
+    ax[0].set_ylabel('Amplitude')
+    ax[0].set_title('Audio Signal (time domain)')
+    ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='blue')
+    ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='red')
+    ax[1].set_title('Gradient of envelope')
+    ax[1].axhline(MIN_PEAK_HEIGHT, color='red')
+    ax[1].plot(time, gradient, linewidth=0.6, alpha = 0.9, color='green')
+    ax[1].plot(time[gradient_peak], gradient[gradient_peak], 'o', color='red')
+    ax[0].plot(time[gradient_peak], envelope[gradient_peak], 'o', color='red')
+    fig.savefig('./software/tmp/interval_extraction.png')
+    if debug:
+        plt.show()
+    print("Extracting intervals")
+    print("Number of intervals:", len(intervals))
     return intervals
 
-def extract_note_and_duration(interval, sample_rate):
-    spectrum_freq, spectrum_mag = freq_analysis(interval, sample_rate)
-    peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.3, distance=50)
-    notes = []
-    for peak in peaks:
-        freq = spectrum_freq[peak]
-        note = freq_to_note(freq)
-        notes.append(note)
-    # print(f'peaks: {spectrum_freq[peaks]}')
-    # note = freq_to_note(spectrum_freq[peaks])
-    duration = len(interval) / sample_rate
-    if notes:
-        most_frequent_note = max(set(notes), key=notes.count)
-        return most_frequent_note, duration
-    return None, duration
+def extract_note_and_duration(data_interval, sample_rate, debug=False):
+    spectrum_freq, spectrum_mag = freq_analysis(data_interval, sample_rate)
+    peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.1, distance=50)
+    
+    duration = len(data_interval) / sample_rate
+    if len(peaks) == 0:
+        return None, duration
+    note_index = peaks[np.argmax(spectrum_mag[peaks])]
+    note_frequency = spectrum_freq[note_index]
+    note_string = freq_to_note(note_frequency)
+
+    time = np.linspace(0, len(data_interval)/sample_rate, len(data_interval))
+    fig, ax = plt.subplots(2, 1, figsize=(20, 20))
+    fig.canvas.manager.set_window_title('Note Identification')
+    ax[0].plot(time, data_interval, '-', linewidth=0.6, alpha = 0.9, color='black')
+    ax[1].plot(spectrum_freq, spectrum_mag, linewidth=0.6, alpha = 0.9, color='black')
+    ax[1].set_xlabel('Frequency (Hz)')
+    ax[1].set_ylabel('Amplitude')
+    ax[1].set_title('Interval (frequency domain)')
+    ax[1].plot(note_frequency, spectrum_mag[note_index], 'x', color='red')
+    ax[1].text(note_frequency+50, spectrum_mag[note_index], note_string, fontsize=8, color='red')
+    if debug:
+        plt.show()
+
+    return note_string, duration
+
 
 def butter_lowpass_filter(data, cutoff, fs, order):
     normal_cutoff = cutoff / (0.5 * fs)
@@ -116,7 +152,7 @@ if __name__ == '__main__':
     # data = signal.savgol_filter(data, 5, 3)
     
     
-    if True:
+    if False:
         # Plot the time domain
         fig, ax = plt.subplots(3, 1)
         ax[0].plot(time, data, '-', linewidth=0.6, alpha = 0.9, color='black')
@@ -156,9 +192,9 @@ if __name__ == '__main__':
         plt.savefig('./software/tmp/analysis.png')
         plt.show()
 
-    intervals = extract_intervals(data, sample_rate)
+    intervals = extract_intervals(data, sample_rate, debug=True)
     for interval in intervals:
-        note, duration = extract_note_and_duration(interval, sample_rate)
+        note, duration = extract_note_and_duration(interval, sample_rate, debug=True)
         print('Note:', note, 'Duration:', duration)
     
     wavfile.write('./software/tmp/filtered.wav', sample_rate, data.astype(np.int16)*50)

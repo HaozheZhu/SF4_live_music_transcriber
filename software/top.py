@@ -3,6 +3,7 @@ import scipy.io.wavfile as wavfile
 import analysis as analysis
 import comms
 import draw
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     # time, data, sample_rate = analysis.load_test_data_wav('./software/_lib/test.wav', 0, 6)
