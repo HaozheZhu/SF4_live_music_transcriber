@@ -100,6 +100,7 @@ def extract_intervals(data, sample_rate, MIN_PEAK_HEIGHT=0.1, debug=False):
     fig.savefig('./software/tmp/interval_extraction.png')
     if debug:
         plt.show()
+    plt.close(fig)
     print("Extracting intervals")
     print("Number of intervals:", len(intervals))
     return intervals
@@ -127,6 +128,7 @@ def extract_note_and_duration(data_interval, sample_rate, debug=False):
     ax[1].text(note_frequency+50, spectrum_mag[note_index], note_string, fontsize=8, color='red')
     if debug:
         plt.show()
+    plt.close(fig)
 
     return note_string, duration
 
@@ -149,7 +151,7 @@ if __name__ == '__main__':
 
     # DSP on data
     # data = butter_lowpass_filter(data, 500, sample_rate, 3)
-    # data = signal.savgol_filter(data, 5, 3)
+    data = signal.savgol_filter(data, 5, 3)
     
     
     if False:

@@ -4,6 +4,7 @@ import analysis as analysis
 import comms
 import draw
 import matplotlib.pyplot as plt
+import subprocess
 
 if __name__ == '__main__':
     # time, data, sample_rate = analysis.load_test_data_wav('./software/_lib/test.wav', 0, 6)
@@ -19,3 +20,5 @@ if __name__ == '__main__':
     durations = np.apply_along_axis(lambda x: np.round(x*8)/8, 0, durations) # round to the nearest 0.125
     
     draw.draw_music(notes, durations)
+
+    subprocess.call('./software/bash_command.sh')
