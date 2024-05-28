@@ -1,16 +1,13 @@
 import serial
-import time
+from time import perf_counter, sleep
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-def serial_setup(): 
+def serial_setup(port_name_string): 
     ser = serial.Serial()
     ser.baudrate = 230400
-    # For Linux
-    ser.port = '/dev/ttyACM2'
-    # For Windows
-    ser.port = 'COM4'
+    ser.port = port_name_string
     ser.open()
     if ser.is_open:
         print("Serial setup complete")
@@ -26,14 +23,14 @@ def read_data(ser):
     return data
 
 def print_data(data):
-    print(time.time(), end=" ")
+    print(perf_counter(), end=" ")
     print(data)
 
 def starting_routine(ser): 
     while input("Input 's' to start: ") not in ['S', 's']:
         pass
     ser.write('S'.encode())
-    time.sleep(0.01)
+    sleep(0.01)
     print("Starting to record")
     data = read_data(ser)
     while data != 0xFFF2:
@@ -47,24 +44,24 @@ def Arduino_reset(ser):
         pass
     print("Arduino reset and ready")    
 
-if __name__ == '__main__':
-    ser = serial_setup()
+def receive(port_name_string, debug=False): 
+    ser = serial_setup(port_name_string)
     Arduino_reset(ser)
     starting_routine(ser)
     print("Recording data, press Ctrl+C to stop")
 
     try: 
         data_list = []
-        start_time = time.perf_counter()
+        start_time = perf_counter()
         while True:
             data = read_data(ser)
-            data_list.append((time.perf_counter()-start_time, data))
+            data_list.append((perf_counter()-start_time, data))
     except KeyboardInterrupt:
         print("Exiting...")
         ser.close()
         print("=====================================")
         print("Number of data points: ", len(data_list))
-        print("Time elapsed: ", time.perf_counter()-start_time)
+        print("Time elapsed: ", perf_counter()-start_time)
         print("Sample rate: ", len(data_list)/data_list[-1][0])
 
         # Remove DC offset
@@ -81,6 +78,11 @@ if __name__ == '__main__':
         plt.plot(time, df['Data'])
         # plt.plot(df['Time'], df['Data'], 'o')
         plt.savefig('./software/tmp/data.png')
-        plt.show()
+        if(debug):
+            plt.show()
+        plt.close()
+
+if __name__ == '__main__':
+    receive('/dev/ttyACM0', debug=True)
 
     

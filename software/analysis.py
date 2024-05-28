@@ -8,13 +8,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import scipy.signal
 
-def load_test_data_wav(path, start_sec, end_sec):
+def load_test_data_wav(path, start_sec=None, end_sec=None):
     sample_rate, data = wavfile.read(path) # data has two channels, left and right
     data = data[:, 0]  # Use only one channel
     time = np.arange(0, float(data.shape[0]), 1) / sample_rate
     # Use only the first few seconds for testing purposes
-    time = time[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
-    data = data[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
+    if start_sec is not None and end_sec is not None:
+        time = time[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
+        data = data[(int(start_sec*sample_rate)):(int(end_sec*sample_rate))] 
 
     print("Loading WAV file:", path)
     print('Sample rate:', sample_rate)
@@ -23,14 +24,17 @@ def load_test_data_wav(path, start_sec, end_sec):
     print('-----------------------------------')
     return time, data, sample_rate
 
-def load_test_data_csv(path, start_sec, end_sec):
+def load_test_data_csv(path, start_sec=None, end_sec=None):
     df = pd.read_csv(path)
     sample_rate = int(len(df) / df.iloc[-1]['Time'])
 
     # Use only the first few seconds for testing purposes
-    time = df['Time'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
-    data = df['Data'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
-
+    if start_sec is not None and end_sec is not None:
+        time = df['Time'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
+        data = df['Data'][int(start_sec*sample_rate):int(end_sec*sample_rate)]
+    else: 
+        data = df['Data']
+        time = df['Time']
     print("Loading CSV file:", path)
     print('Average sample rate:', sample_rate)
     print('Total samples:', len(data))
@@ -68,7 +72,7 @@ def freq_analysis(data, sample_rate):
     # spectrum_mag = scipy.ndimage.gaussian_filter1d(spectrum_mag, 3)
     return spectrum_freq, spectrum_mag
 
-def extract_intervals(data, sample_rate, MIN_PEAK_HEIGHT=0.1, debug=False): 
+def extract_intervals(data, sample_rate, MIN_PEAK_HEIGHT=0.2, debug=False): 
     # output: list of intervals, each interval is a list of two elements: the data and the duration in seconds
     # interval edegs are detected by large positive gradient of the smoothed envelope
     envelope, envelope_log = compute_envelope(data)
