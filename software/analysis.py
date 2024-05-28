@@ -156,51 +156,10 @@ if __name__ == '__main__':
     # DSP on data
     # data = butter_lowpass_filter(data, 500, sample_rate, 3)
     data = signal.savgol_filter(data, 5, 3)
-    
-    
-    if False:
-        # Plot the time domain
-        fig, ax = plt.subplots(3, 1)
-        ax[0].plot(time, data, '-', linewidth=0.6, alpha = 0.9, color='black')
-        ax[0].plot(time, data, 'x', linewidth=0.6, alpha = 0.9, color='black')
-        ax[0].set_xlabel('Time (s)')
-        ax[0].set_ylabel('Amplitude')
-        ax[0].set_title('Audio Signal (time domain)')
-        
-        envelope, envelope_log = compute_envelope(data)
-
-        ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='blue')
-        ax[0].plot(time, envelope, linewidth=0.6, alpha = 0.9, color='red')
-        gradient = np.gradient(envelope)
-        min_peak_height = 0.1
-        gradient_peak, _ = signal.find_peaks(gradient, height=min_peak_height, distance=int(sample_rate*0.05))
-        ax[2].set_title('Gradient of log(envelope)')
-        ax[2].axhline(min_peak_height, color='red')
-        ax[2].plot(time, gradient, linewidth=0.6, alpha = 0.9, color='green')
-        ax[2].plot(time[gradient_peak], gradient[gradient_peak], 'o', color='red')
-        ax[0].plot(time[gradient_peak], envelope[gradient_peak], 'o', color='red')
-
-        spectrum_freq, spectrum_mag = freq_analysis(data, sample_rate)
-        ax[1].plot(spectrum_freq, spectrum_mag, linewidth=0.6, alpha = 0.9, color='black')
-        ax[1].set_xlabel('Frequency (Hz)')
-        ax[1].set_ylabel('Amplitude')
-        ax[1].set_title('Audio Signal (frequency domain)')
-
-        # TODO: Find the fundamental frequency of the note
-        peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.3, distance=50)
-        ax[1].plot(spectrum_freq[peaks], spectrum_mag[peaks], 'x', color='red')
-        print('Peaks:', peaks)
-
-        for peak in peaks:
-            print('Peak frequency:', spectrum_freq[peak])
-            print('Peak note:', freq_to_note(spectrum_freq[peak]))
-            ax[1].text(spectrum_freq[peak], spectrum_mag[peak], freq_to_note(spectrum_freq[peak]), fontsize=8, color='blue')
-        plt.savefig('./software/tmp/analysis.png')
-        plt.show()
 
     intervals = extract_intervals(data, sample_rate, debug=True)
     for interval in intervals:
         note, duration = extract_note_and_duration(interval, sample_rate, debug=True)
         print('Note:', note, 'Duration:', duration)
     
-    wavfile.write('./software/tmp/filtered.wav', sample_rate, data.astype(np.int16)*50)
+    # wavfile.write('./software/tmp/filtered.wav', sample_rate, data.astype(np.int16)*50)

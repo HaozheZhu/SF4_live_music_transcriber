@@ -71,16 +71,6 @@ def receive(port_name_string, debug=False):
 
         df = pd.DataFrame(data_list, columns=['Time', 'Data'])
         df.to_csv('./software/tmp/data.csv', index=False)
-        print(df.head())
-        sampling_rate = 2000
-        time = np.arange(0, len(data_list)/sampling_rate, 1/sampling_rate)
-        # plt.plot(time, df['Data'], 'o')
-        plt.plot(time, df['Data'])
-        # plt.plot(df['Time'], df['Data'], 'o')
-        plt.savefig('./software/tmp/data.png')
-        if(debug):
-            plt.show()
-        plt.close()
 
 if __name__ == '__main__':
     receive('/dev/ttyACM0', debug=True)
