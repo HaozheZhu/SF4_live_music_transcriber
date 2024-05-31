@@ -11,6 +11,10 @@ void sendValue(uint16_t value) {
 }
 
 void starting_routine() {
+    Serial.begin(230400);
+    pinMode(13, OUTPUT);
+    digitalWrite(13, HIGH); // turn on LED to indicate that Arduino is ready to start
+    Serial.write('R'); // send ready signal to PC
     uint8_t buf[1];
     Serial.readBytes(buf, 1); 
     while(buf[0] != 0x53) {
@@ -41,10 +45,6 @@ void timer_routine(uint16_t(*funcptr)()) {
 }
 
 void setup() {
-    Serial.begin(230400);
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH); // turn on LED to indicate that Arduino is ready to start
-    Serial.write('R'); // send ready signal to PC
     starting_routine();
 }
 
