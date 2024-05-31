@@ -109,7 +109,7 @@ def extract_intervals(data, sample_rate, MIN_PEAK_HEIGHT=0.2, debug=False):
     print("Number of intervals:", len(intervals))
     return intervals
 
-def extract_note_and_duration(data_interval, sample_rate, debug=False):
+def extract_note_and_duration(data_interval, sample_rate, number, debug=False):
     spectrum_freq, spectrum_mag = freq_analysis(data_interval, sample_rate)
     peaks, _ = signal.find_peaks(spectrum_mag, height=max(spectrum_mag)*0.1, distance=50)
     
@@ -129,20 +129,14 @@ def extract_note_and_duration(data_interval, sample_rate, debug=False):
     ax[1].set_ylabel('Amplitude')
     ax[1].set_title('Interval (frequency domain)')
     ax[1].plot(note_frequency, spectrum_mag[note_index], 'x', color='red')
-    ax[1].text(note_frequency+50, spectrum_mag[note_index], note_string, fontsize=8, color='red')
+    ax[1].text(note_frequency+10, spectrum_mag[note_index], note_string, fontsize=12, color='red')
+    ax[0].set_xlabel('Time (s)')
+    fig.savefig(f'./software/tmp/note_{number}.png')
     if debug:
         plt.show()
     plt.close(fig)
 
     return note_string, duration
-
-
-def butter_lowpass_filter(data, cutoff, fs, order):
-    normal_cutoff = cutoff / (0.5 * fs)
-    # Get the filter coefficients 
-    b, a = signal.butter(order, normal_cutoff, btype='low', analog=False)
-    y = signal.filtfilt(b, a, data)
-    return y
 
 if __name__ == '__main__':
     # time, data, sample_rate = load_test_data_wav('./software/_lib/test.wav', 0, 5)
@@ -158,8 +152,8 @@ if __name__ == '__main__':
     data = signal.savgol_filter(data, 5, 3)
 
     intervals = extract_intervals(data, sample_rate, debug=True)
-    for interval in intervals:
-        note, duration = extract_note_and_duration(interval, sample_rate, debug=True)
+    for interval, number in zip(intervals, range(len(intervals))):
+        note, duration = extract_note_and_duration(interval, sample_rate, number, debug=True)
         print('Note:', note, 'Duration:', duration)
     
     # wavfile.write('./software/tmp/filtered.wav', sample_rate, data.astype(np.int16)*50)

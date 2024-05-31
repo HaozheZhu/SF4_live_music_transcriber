@@ -16,8 +16,8 @@ if __name__ == '__main__':
     intervals = analysis.extract_intervals(data, sample_rate, debug=True)
     notes = []
     durations = []
-    for interval in intervals:
-        note, duration = analysis.extract_note_and_duration(interval, sample_rate, debug=True)
+    for interval, number in zip(intervals, range(len(intervals))):
+        note, duration = analysis.extract_note_and_duration(interval, sample_rate, number, debug=True)
         print('Note:', note, 'Duration:', duration)
         notes.append(note)
         durations.append(duration)
