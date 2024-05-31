@@ -123,6 +123,7 @@ def extract_note_and_duration(data_interval, sample_rate, number, debug=False):
     time = np.linspace(0, len(data_interval)/sample_rate, len(data_interval))
     fig, ax = plt.subplots(2, 1, figsize=(10, 10))
     fig.canvas.manager.set_window_title('Note Identification')
+    ax[0].set_title('Note Interval (time domain)')
     ax[0].plot(time, data_interval, '-', linewidth=1, alpha = 0.9, color='black')
     ax[1].plot(spectrum_freq, spectrum_mag, linewidth=1, alpha = 0.9, color='black')
     ax[1].set_xlabel('Frequency (Hz)')
