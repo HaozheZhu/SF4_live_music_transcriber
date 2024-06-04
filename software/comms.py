@@ -3,6 +3,7 @@ from time import perf_counter, sleep
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.io.wavfile as wavfile
 
 def serial_setup(port_name_string): 
     ser = serial.Serial()
@@ -71,6 +72,9 @@ def receive(port_name_string, debug=False):
 
         df = pd.DataFrame(data_list, columns=['Time', 'Data'])
         df.to_csv('./software/tmp/data.csv', index=False)
+
+        wavfile.write('./software/tmp/data.wav', 4000, data_list[:, 1])
+
 
 if __name__ == '__main__':
     receive('/dev/ttyACM0', debug=True)

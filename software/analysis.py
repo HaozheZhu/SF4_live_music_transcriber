@@ -2,7 +2,7 @@ from scipy.io import wavfile
 import scipy.fft as fft
 import scipy.ndimage
 import scipy.signal as signal
-import scipy
+import scipy.io.wavfile as wavfile
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -78,14 +78,16 @@ def extract_intervals(data, sample_rate, MIN_PEAK_HEIGHT=0.2, debug=False):
     envelope, envelope_log = compute_envelope(data)
     gradient = np.gradient(envelope)
     gradient_peak, _ = signal.find_peaks(gradient, height=MIN_PEAK_HEIGHT, distance=int(sample_rate*0.05))
+    wav_data, sample_rate_wav = wavfile.read('./software/tmp/data.wav')
 
     intervals = []
+    intervals_wav = []
     for i in range(len(gradient_peak)-1):
         start = gradient_peak[i]
         end = gradient_peak[i+1]
         intervals.append(data[start:end])
+        # intervals_wav.append(wav_data[start:end])
 
-    
     time = np.linspace(0, len(data)/sample_rate, len(data))
     fig, ax = plt.subplots(2, 1, figsize=(10, 10))
     fig.canvas.manager.set_window_title('Interval Extraction')
